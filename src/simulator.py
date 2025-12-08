@@ -1,13 +1,13 @@
 from src.library import Library
 import random
 
-from src.models import Book
+from src.models import RareBook, Book, DigitalBook
 from src.constants import TITLES, AUTHORS, GENRES
 
 
 def generate_book() -> Book:
     """
-    generate a random book
+    Generate a random book
 
     :return: random book
     """
@@ -17,25 +17,53 @@ def generate_book() -> Book:
     year = random.randint(1800, 2024)
     isbn = int("".join(str(random.randint(0, 9)) for _ in range(13)))
 
-    return Book(
-        title=title,
-        author=author,
-        year=year,
-        genre=genre,
-        isbn=isbn
-    )
+    kind_roll = random.randint(0, 9)
+
+    if kind_roll >= 8:
+        price = random.randint(10_000, 200000)
+        rarity_level = random.randint(6, 10)
+        return RareBook(
+            title=title,
+            author=author,
+            year=year,
+            genre=genre,
+            isbn=isbn,
+            price=price,
+            rarity_level=rarity_level,
+        )
+    elif kind_roll >= 6:
+        file_format = random.choice(["PDF", "EPUB", "FB2", "MOBI"])
+        pages = random.randint(50, 1200)
+        return DigitalBook(
+            title=title,
+            author=author,
+            year=year,
+            genre=genre,
+            isbn=isbn,
+            file_format=file_format,
+            pages=pages,
+        )
+    else:
+        return Book(
+            title=title,
+            author=author,
+            year=year,
+            genre=genre,
+            isbn=isbn,
+        )
+
 
 def event_add_book(library: Library) -> None:
     """
-    add a book to the library
+    Add a book to the library
 
     :param library: library
-    :return: None
-    """
+    :return: None """
     book = generate_book()
     library.add_book(book)
-    print(f"[ADD] Добавлена книга: {book.title} ({book.author}, {book.year}) | ISBN {book.isbn}")
-
+    print(
+        f"[ADD] Добавлена книга: {book.get_description()}"
+    )
 
 def event_remove_random_book(library: Library) -> None:
     """
@@ -45,12 +73,13 @@ def event_remove_random_book(library: Library) -> None:
     """
     books = library.get_all_books()
     if len(books) == 0:
-        print("[REMOVE] В библиотеке нет книг — удалять нечего")
+        print("[REMOVE] В библиотеке нет книг - удалять нечего")
         return
 
     to_remove = random.choice(books)
     library.remove_book(to_remove)
-    print(f"[REMOVE] Удалена книга: {to_remove.title} ({to_remove.author}, {to_remove.year})")
+    print(f"[REMOVE] Удалена книга: {to_remove.get_description()}")
+
 
 
 def event_find_by_author(library: Library) -> None:
@@ -100,7 +129,7 @@ def event_find_existing_isbn(library: Library) -> None:
 
     book = random.choice(books)
     result = library.find_by_isbn(book.isbn)
-    print(f"[SEARCH] Поиск существующего ISBN {book.isbn} → найдено: {result}")
+    print(f"[SEARCH] Поиск существующего ISBN {book.isbn} → найдено: {result.get_description()}")
 
 
 def event_find_fake_isbn(library: Library) -> None:
@@ -115,7 +144,7 @@ def event_find_fake_isbn(library: Library) -> None:
     if result is None:
         print(f"[SEARCH] Поиск несуществующего ISBN {fake} → книга не найдена")
     else:
-        print(f"[BUG] Нашлась книга по фейковому ISBN! Индекс повреждён.")
+        print(f"[SEARCH] Поиск существующего ISBN {result.isbn} → найдено: {result.get_description()}")
 
 def event_get_books_count(library: Library) -> None:
     """
