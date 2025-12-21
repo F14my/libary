@@ -33,12 +33,14 @@ class BookIndex:
             del self.by_isbn[book.isbn]
 
         if book.author in self.by_author:
-            self.by_author[book.author].remove(book)
+            if book.year in self.by_year[book.year]:
+                self.by_author[book.author].remove(book)
             if not self.by_author[book.author]:
                 del self.by_author[book.author]
 
         if book.year in self.by_year:
-            self.by_year[book.year].remove(book)
+            if book in self.by_year[book.year]:
+                self.by_year[book.year].remove(book)
             if not self.by_year[book.year]:
                 del self.by_year[book.year]
 
